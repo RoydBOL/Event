@@ -13,11 +13,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import com.example.event.ui.theme.EventTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,24 +33,27 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.eventFlow.collect {
+                when (it) {
+                    is MyViewModel.MyEvent.ErrorEvent -> {
+                        Toast.makeText(this@MainActivity, it.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
     }
 }
 
 @Composable
 fun MyScreen(viewModel: MyViewModel, modifier: Modifier = Modifier) {
-    viewModel.myString.observeAsState().value
-    val context = LocalContext.current
-    val toast = {
-        viewModel.assignText()
-        Toast.makeText(context, viewModel.myString.value, Toast.LENGTH_SHORT).show()
-    }
-
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Button(onClick = { toast.invoke() }) {
+        Button(onClick = { viewModel.triggerEvent() }) {
             Text(text = "Click Me")
         }
     }
