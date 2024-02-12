@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.LifecycleOwner
 import com.example.event.ui.theme.EventTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,24 +35,20 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        viewModel.myString.observe(this) {
+            Toast.makeText(this@MainActivity, viewModel.myString.value, Toast.LENGTH_SHORT).show()
+        }
     }
 }
 
 @Composable
 fun MyScreen(viewModel: MyViewModel, modifier: Modifier = Modifier) {
-    viewModel.myString.observeAsState().value
-    val context = LocalContext.current
-    val toast = {
-        viewModel.assignText()
-        Toast.makeText(context, viewModel.myString.value, Toast.LENGTH_SHORT).show()
-    }
-
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Button(onClick = { toast.invoke() }) {
+        Button(onClick = { viewModel.assignText() }) {
             Text(text = "Click Me")
         }
     }
